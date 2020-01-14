@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">assetmanagement</string>
+    <string name="action_settings">Settings</string>
+
+<!--    //////////////////////////////////////////////////////指纹验证-->
+    <string name="biometric_dialog_cancel">取消</string>
+    <string name="biometric_dialog_title">验证</string>
+    <string name="biometric_dialog_subtitle">验证指纹以继续</string>
+    <string name="biometric_dialog_state_normal">指纹感应器</string>
+    <string name="biometric_dialog_state_failed">无法识别，请重试</string>
+    <string name="biometric_dialog_state_error">验证错误，请输入付款密码</string>
+    <string name="biometric_dialog_state_error_enable_process">验证错误，设置失败</string>
+    <string name="biometric_dialog_state_succeeded">验证成功</string>
+    <string name="biometric_dialog_use_password">使用密码</string>
+
+
+<!--//////////////////////////////////////////////////////////统计-->
+    <string name="viewGithub">在GitHub上查看</string>
+    <string name="reportProblem">问题报告</string>
+    <string name="viewWebsite">开发者网站</string>
+    <string name="actionSave">保存到图库</string>
+
+    <string name="animateX">Animate X</string>
+    <string name="animateY">Animate Y</string>
+    <string name="animateXY">Animate XY</string>
+
+    <string name="actionToggleValues">切换值</string>
+    <string name="actionToggleYValues">切换Y值</string>
+    <string name="actionToggleXValues">切换X值</string>
+
+    <string name="actionToggleIcons">切换图标</string>
+    <string name="actionToggleHighlight">切换高光</string>
+    <string name="actionTogglePinch">切换捏缩放</string>
+    <string name="actionToggleAutoScale">切换自动缩放</string>
+
+    <string name="actionToggleLineValues">切换线值</string>
+    <string name="actionToggleBarValues">切换条值</string>
+    <string name="actionToggleBarBorders">切换栏边框</string>
+    <string name="actionToggleFilled">切换填充</string>
+    <string name="actionToggleCircles">切换圈子</string>
+    <string name="actionToggleCandleShadow">切换阴影颜色</string>
+
+    <string name="actionToggleCubic">切换立方</string>
+    <string name="actionToggleStepped">切换步进</string>
+    <string name="actionToggleHorizontalCubic">切换水平立方</string>
+
+    <string name="actionAddEntry">添加条目</string>
+    <string name="actionFeedMultiple">添加多个</string>
+    <string name="actionRemoveEntry">删除条目</string>
+    <string name="actionAddDataSet">添加数据集</string>
+    <string name="actionRemoveDataSet">删除数据集</string>
+    <string name="actionClearChart">清除的图表</string>
+
+    <string name="actionTogglePercent">切换百分比</string>
+    <string name="actionToggleMinAngles">切换最小角度</string>
+    <string name="actionToggleHole">切换洞</string>
+    <string name="actionToggleCurvedSlices">切换曲线切片</string>
+    <string name="actionDrawCenterText">绘制中心文本</string>
+    <string name="actionToggleHighlightCircle">切换突出圆</string>
+    <string name="actionToggleRotation">旋转开关</string>
+    <string name="actionToggleSpin">旋转的动画</string>
+
+    <string name="dash">-</string>
+    <string name="scrollViewStart">开始滚动视图</string>
+    <string name="scrollViewEnd">结束滚动视图</string>
+
+</resources>
