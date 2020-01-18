@@ -39,10 +39,12 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import z.t.assetmanagement.R;
 import z.t.assetmanagement.dataBase.TotalCapitalRecord;
+import z.t.assetmanagement.helpClass.ProcessUtil;
 import z.t.assetmanagement.mpchartexample.notimportant.DemoBase;
 
 /**
@@ -134,7 +136,7 @@ public class LineChartActivity2 extends DemoBase implements OnSeekBarChangeListe
         XAxis xAxis = chart.getXAxis();
         xAxis.setTypeface(tfLight);
         xAxis.setTextSize(11f);
-        xAxis.setTextColor(Color.WHITE);
+        xAxis.setTextColor(Color.BLACK);
         xAxis.setDrawGridLines(false);
         xAxis.setDrawAxisLine(false);
 
@@ -163,11 +165,17 @@ public class LineChartActivity2 extends DemoBase implements OnSeekBarChangeListe
     }
 
     private void setData(int count, float range) {
-
+        String lastyear = ProcessUtil.ConverToString(new Date());
         ArrayList<Entry> values1 = new ArrayList<>();
+        int y = -500;
         for (int i = 0; i < tolist.size(); i++) {
             TotalCapitalRecord t = tolist.get(i);
-            values1.add(new Entry(i, (float) t.getTotalamount()));
+            int x = Math.toIntExact(ProcessUtil.getBaseDay(lastyear, ProcessUtil.ConverToString(t.getCreatedate())));
+            if(x<=y){
+                x = y+1;
+            }
+            values1.add(new Entry(x, (float) t.getTotalamount()));
+            y=x;
         }
 
 //        ArrayList<Entry> values2 = new ArrayList<>();

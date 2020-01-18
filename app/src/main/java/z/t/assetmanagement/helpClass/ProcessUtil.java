@@ -7,6 +7,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -247,7 +248,22 @@ public class ProcessUtil {
                 , date.get(Calendar.YEAR), date.get(Calendar.MONTH), date
                 .get(Calendar.DAY_OF_MONTH)).show();
     }
-
+    /*
+        判读时间差距，两个时间相差多少天，时，分，秒
+         */
+    public static Long getBaseDay(String base,String date) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Long days = null;
+        try {
+            Date pastTime = dateFormat.parse(base);//现在系统当前时间
+            Date currentTime = dateFormat.parse(date);//过去时间
+            long diff = currentTime.getTime() - pastTime.getTime();
+            days = diff / (1000 * 60 * 60 * 24);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return days;
+    }
 //    //选择时间  不能超过当前 不含时分
 //    public static void initDatePicker1(final EditText editText, Activity mActivity) {
 //        CustomDatePicker customDatePicker1;

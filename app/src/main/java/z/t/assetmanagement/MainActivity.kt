@@ -484,10 +484,12 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.统计 -> {
                 val gson = Gson()
-                var m = 15
-                if (15 > totalCapitalRecordList.size) m = totalCapitalRecordList.size
-                val list10 = totalCapitalRecordList.subList(0, m)
-                Collections.sort(list10, SortByPhase()) //排序
+//                var m = 15
+//                if (15 > totalCapitalRecordList.size) m = totalCapitalRecordList.size
+//                val list10 = totalCapitalRecordList.subList(0, m)
+//                Collections.sort(list10, SortByPhase()) //排序
+                val lastyear = ProcessUtil.addDay(ProcessUtil.ConverToString(Date()),-1,3)
+                val list10 = LitePal.where("createdate > $lastyear").order("phase").limit(15).find<TotalCapitalRecord>()
                 val ss = gson.toJson(list10)
                 val intent = Intent(this, LineChartActivity2().javaClass)
                 intent.putExtra("list", ss)
