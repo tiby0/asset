@@ -83,4 +83,14 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/in" />
 
+    <ImageView
+            android:id="@+id/changeButton"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginStart="128dp"
+            android:layout_marginTop="204dp"
+            android:src="@mipmap/title"
+            app:layout_constraintStart_toEndOf="@id/short1"
+            app:layout_constraintTop_toBottomOf="@id/text_view" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

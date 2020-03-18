@@ -15,16 +15,19 @@ import androidx.recyclerview.widget.RecyclerView
 import z.t.assetmanagement.R
 import z.t.assetmanagement.dataBase.TotalCapitalRecord
 import z.t.assetmanagement.helpClass.ToastUtil
+import java.math.BigDecimal
 import java.text.SimpleDateFormat
 
 
-class TotalAdapter(private val mContext: Context, private var data: List<TotalCapitalRecord>?) :
+class TotalAdapter(var mContext: Context, var data: List<TotalCapitalRecord>?, var listStatus: String) :
     RecyclerView.Adapter<TotalAdapter.ViewHolder>() {
 
     //声明长按接口
     private var longClickLisenter: OnReItemLongClickLisenter? = null
     //声明点击接口
     private var clickLisenter: OnReItemOnclickLisenter? = null
+
+    private var listStatus2: String = listStatus
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         //负责创建视图
@@ -58,8 +61,9 @@ class TotalAdapter(private val mContext: Context, private var data: List<TotalCa
     }
 
 
-    fun notifyDataSetChanged(dataList: List<TotalCapitalRecord>) {
+    fun notifyDataSetChanged(dataList: List<TotalCapitalRecord>, listStatus3: String) {
         this.data = dataList
+        listStatus2 = listStatus3
         super.notifyDataSetChanged()
     }
 
@@ -74,6 +78,7 @@ class TotalAdapter(private val mContext: Context, private var data: List<TotalCa
         holder.createDate.text = time
         holder.phase.text = "第 ${data!![position].phase} 期"
         var totalCapitalRecord: TotalCapitalRecord? = null
+        var nowtotalCapitalRecord: TotalCapitalRecord? = null
         var change = 0.0
         if (position == data!!.size - 1) {
             change = data!![position].totalamount
@@ -89,6 +94,11 @@ class TotalAdapter(private val mContext: Context, private var data: List<TotalCa
             holder.totalChange.text = "$change"
             holder.totalChange.setTextColor(ContextCompat.getColor(mContext, R.color.text_green))
         }
+
+        if (data!![position].remark != "") {
+            holder.remark.visibility = View.VISIBLE
+            holder.remark.text = data!![position].remark
+        }
         holder.total.setOnClickListener {
             if (holder.recyclerview.isVisible) holder.recyclerview.visibility = View.GONE
             else holder.recyclerview.visibility = View.VISIBLE
@@ -99,7 +109,12 @@ class TotalAdapter(private val mContext: Context, private var data: List<TotalCa
         holder.recyclerview.isNestedScrollingEnabled = false//禁止滑动
         //mLayoutManage.setOrientation(OrientationHelper.HORIZONTAL)//设置滚动方向，横向滚动
         holder.recyclerview.layoutManager = mLayoutManage
-        val mAdapter = RecycleViewAdapter(mContext, data!![position].capitalRecordlist,totalCapitalRecord)
+        val mAdapter = RecycleViewAdapter(
+            mContext,
+            data!![position].capitalRecordlist,
+            totalCapitalRecord,
+            BigDecimal(data!![position].totalamount.toString())
+        )
         holder.recyclerview.adapter = mAdapter
 
         //调用适配器里的方法
@@ -133,21 +148,28 @@ class TotalAdapter(private val mContext: Context, private var data: List<TotalCa
 
         mAdapter.setOnReItemLongClickLisenter { view, position2 ->
             //ToastUtil.showSnackbar(view,"2L")
+            if (listStatus2 == "全部") {
+                AlertDialog.Builder(mContext).setTitle("系统提示").setMessage("删除此条记录？")
+                    .setNegativeButton("取消") { dialogInterface: DialogInterface, i: Int ->
+                    }
+                    .setPositiveButton("确定") { dialogInterface: DialogInterface, i: Int ->
+                        data!![position].capitalRecordlist[position2].delete()
+                        data!![position].totalamount -= data!![position].capitalRecordlist[position2].amount
+                        data!![position].remark.replace(data!![position].capitalRecordlist[position2].remark, "")
+                        data!![position].capitalRecordlist -= data!![position].capitalRecordlist[position2]
+                        data!![position].save()
+                        mAdapter.notifyDataSetChanged(data!![position].capitalRecordlist)
+                        notifyDataSetChanged()
+                    }
+                    .show()
+            } else {
+                AlertDialog.Builder(mContext).setTitle("系统提示").setMessage("请切换到全部模式再删除")
+                    .setNegativeButton("好的") { dialogInterface: DialogInterface, i: Int ->
+                    }
 
-            AlertDialog.Builder(mContext).setTitle("系统提示").setMessage("删除此条记录？")
-                .setNegativeButton("取消") { dialogInterface: DialogInterface, i: Int ->
-                }
-                .setPositiveButton("确定") { dialogInterface: DialogInterface, i: Int ->
-                    data!![position].capitalRecordlist[position2].delete()
-                    data!![position].totalamount -= data!![position].capitalRecordlist[position2].amount
-                    data!![position].capitalRecordlist -= data!![position].capitalRecordlist[position2]
-
-                    mAdapter.notifyDataSetChanged(data!![position].capitalRecordlist)
-                    notifyDataSetChanged()
-                }
-                .show()
+                    .show()
+            }
         }
-
 
         ///////////////////////////////////////////////////////////////////////////////////
         holder.itemView.setOnClickListener {
@@ -183,5 +205,6 @@ class TotalAdapter(private val mContext: Context, private var data: List<TotalCa
         var total: TextView = itemView.findViewById(R.id.total)
         var phase: TextView = itemView.findViewById(R.id.phase)
         var createDate: TextView = itemView.findViewById(R.id.createDate)
+        var remark: TextView = itemView.findViewById(R.id.remark)
     }
 }

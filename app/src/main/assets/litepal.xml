@@ -19,8 +19,8 @@
     例如：
     	<version value="1" />
     -->
-    <!--    200102-->
-    <version value="7" />
+    <!--    200228-->
+    <version value="11" />
 
     <!--
     	使用映射标记在列表中定义模型，LitePal将
@@ -34,6 +34,7 @@
     -->
     <list>
         <mapping class="z.t.assetmanagement.dataBase.CapitalRecord"/>
+        <mapping class="z.t.assetmanagement.dataBase.CapitalRecordType"/>
         <mapping class="z.t.assetmanagement.test.DataBaseTestBean"/>
         <mapping class="z.t.assetmanagement.dataBase.TotalCapitalRecord"/>
     </list>

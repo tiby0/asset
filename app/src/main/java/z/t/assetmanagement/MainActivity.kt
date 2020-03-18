@@ -1,5 +1,7 @@
 package z.t.assetmanagement
 
+
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -20,13 +22,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.scwang.smart.refresh.layout.SmartRefreshLayout
 import kotlinx.android.synthetic.main.activity_main.*
-
 import org.litepal.LitePal
 import org.litepal.extension.find
 import org.litepal.extension.findFirst
-
 import z.t.assetmanagement.adapter.TotalAdapter
 import z.t.assetmanagement.dataBase.CapitalRecord
+import z.t.assetmanagement.dataBase.CapitalRecordType
 import z.t.assetmanagement.dataBase.TotalCapitalRecord
 import z.t.assetmanagement.enumpack.LevelEnum
 import z.t.assetmanagement.enumpack.StatusEnum
@@ -37,96 +38,70 @@ import z.t.assetmanagement.helpClass.ToastUtil
 import z.t.assetmanagement.helpClass.UUIDGenerator
 import z.t.assetmanagement.mpchartexample.LineChartActivity2
 import z.t.assetmanagement.style.TimeDialog
-
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
+
 class MainActivity : AppCompatActivity() {
 
-    lateinit var mAdapter: TotalAdapter
+    private lateinit var mAdapter: TotalAdapter
     private lateinit var recycleView: RecyclerView
-    lateinit var totalCapitalRecordList: List<TotalCapitalRecord>
+    private lateinit var totalCapitalRecordList: List<TotalCapitalRecord>
     private lateinit var totalCapitalRecordAddList: List<TotalCapitalRecord>
     private var start: Int = 0
     private lateinit var refreshLayout: SmartRefreshLayout
-    val typelist = ArrayList<String>()
-    var namelist = ArrayList<String>()
-    val levellist = ArrayList<String>()
-    val statuslist = ArrayList<String>()
-    lateinit var mPopup: ListPopupWindow
-    lateinit var lastCaplist: List<CapitalRecord>
+    private val typeList = ArrayList<String>()
+    private val twoTypeList = ArrayList<String>()
+    private val twoNameList = ArrayList<String>()
+    private var namelist = ArrayList<String>()
+    private val levelList = ArrayList<String>()
+    private val statusList = ArrayList<String>()
+    private lateinit var mPopup: ListPopupWindow
+    private lateinit var lastCapList: List<CapitalRecord>
+
+    private var changeType = "账户"//其余两种是 全部 类型
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        select()
-        fab.setOnClickListener {
-            // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-            //.setAction("Action", null).show()
-            showAdd(this)
-        }
-//        fab2.setOnClickListener {
-//            // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//            //.setAction("Action", null).show()
-//            var totalCapitalRecordListppp = LitePal.findAll(TotalCapitalRecord::class.java)
-//            for (t in totalCapitalRecordListppp) {
-//                t.phase = 0
-//                t.save()
-//            }
-//            var capitalRecordListppp = LitePal.findAll(CapitalRecord::class.java)
-//            for (t in capitalRecordListppp) {
-//                t.phase = 0
-//                t.save()
-//            }
-//        }
-//        fab2.visibility = View.GONE
-        typelist.clear()
-        for (t in TypeEnum.values()) {
-            typelist.add(t.name)
-        }
-        levellist.clear()
-        for (t in LevelEnum.values()) {
-            levellist.add(t.name)
-        }
-        statuslist.clear()
-        for (t in StatusEnum.values()) {
-            statuslist.add(t.name)
-        }
-        val capPhase = LitePal.order("phase desc").findFirst<CapitalRecord>()
-        lastCaplist = LitePal.where("phase = ${capPhase?.phase ?: 0}").find<CapitalRecord>()
-        for (c in lastCaplist) {
-            this.namelist.add(c.name)
-        }
-        mPopup = ListPopupWindow(this)
+
+        read()
+//        select()
+
     }
 
     private fun showAdd(activity: AppCompatActivity): AlertDialog {
         val builder = AlertDialog.Builder(activity)//修改这里
 
         val view = View.inflate(activity, R.layout.add, null)
-        val name: EditText = view.findViewById(R.id.name)
+        val name: Spinner = view.findViewById(R.id.name)
         val amount: EditText = view.findViewById(R.id.amount)
         val phase: EditText = view.findViewById(R.id.phase)
         val remark: EditText = view.findViewById(R.id.remark)
         val yes: Button = view.findViewById(R.id.yes)
         val no: Button = view.findViewById(R.id.no)
         val type: Spinner = view.findViewById(R.id.type)
+        val twoType: Spinner = view.findViewById(R.id.twoType)
         val level: Spinner = view.findViewById(R.id.level)
         val levelL: LinearLayout = view.findViewById(R.id.levelL)
         val status: Spinner = view.findViewById(R.id.status)
         val statusL: LinearLayout = view.findViewById(R.id.statusL)
         val more: LinearLayout = view.findViewById(R.id.more_name)
+        val delete: ImageView = view.findViewById(R.id.delete)
+        val deletenote: ImageView = view.findViewById(R.id.deletenote)
 
-        pop(name, type)
-        SpringUtil.adapterDataString(typelist, type, this)
-        SpringUtil.adapterDataString(levellist, level, this)
-        SpringUtil.adapterDataString(statuslist, status, this)
+        pop(type, name, twoType, amount, remark)
+        SpringUtil.adapterDataString(typeList, type, this)
+        SpringUtil.adapterDataString(levelList, level, this)
+        SpringUtil.adapterDataString(statusList, status, this)
+        SpringUtil.adapterDataString(namelist, name, this)
+        SpringUtil.adapterDataString(twoTypeList, twoType, this)
         val capPhase = LitePal.order("phase desc").findFirst<CapitalRecord>()
         if (capPhase != null) {
-            phase.hint = capPhase.phase.toString() + "   " + ProcessUtil.ConverToString(capPhase.createdate)
+            phase.hint = capPhase.phase.toString() + "    " + ProcessUtil.ConverToString(capPhase.createdate)
         }
 //        phase.isFocusable = true
 //        phase.isFocusableInTouchMode = true
@@ -158,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                 id: Long
             ) {
                 amount.setText("")
-                remark.setText("")
+//                remark.setText("")
                 if (type.selectedItem == "其他") {
                     levelL.visibility = View.VISIBLE
                     statusL.visibility = View.VISIBLE
@@ -166,6 +141,54 @@ class MainActivity : AppCompatActivity() {
                     levelL.visibility = View.GONE
                     statusL.visibility = View.GONE
                 }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // TODO Auto-generated method stub
+            }
+        }
+        name.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+            //当选中某一个数据项时触发该方法
+            /*
+             * parent接收的是被选择的数据项所属的 Spinner对象，
+             * view参数接收的是显示被选择的数据项的TextView对象
+             * position接收的是被选择的数据项在适配器中的位置
+             * id被选择的数据项的行号
+             */
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View,
+                position: Int,
+                id: Long
+            ) {
+                amount.setText("")
+//                remark.setText("")
+
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // TODO Auto-generated method stub
+            }
+        }
+        twoType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+            //当选中某一个数据项时触发该方法
+            /*
+             * parent接收的是被选择的数据项所属的 Spinner对象，
+             * view参数接收的是显示被选择的数据项的TextView对象
+             * position接收的是被选择的数据项在适配器中的位置
+             * id被选择的数据项的行号
+             */
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View,
+                position: Int,
+                id: Long
+            ) {
+                amount.setText("")
+//                remark.setText("")
+
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -221,10 +244,18 @@ class MainActivity : AppCompatActivity() {
         val dialog = builder.create()
         more.setOnClickListener {
 
-            if (!mPopup.isShowing && namelist.size > 0) { // Log.i(TAG, "切换为角向上图标");
-//                more1.setImageResource(R.mipmap.login_more_down) // 切换图标
+            if (!mPopup.isShowing && twoNameList.size > 0) {
                 mPopup.show()// 显示弹出窗口
+//                souKey(it)
             }
+        }
+        delete.setOnClickListener {
+            amount.setText("")
+//            remark.setText("")
+        }
+        deletenote.setOnClickListener {
+//            amount.setText("")
+            remark.setText("")
         }
 
         no.setOnClickListener { dialog.dismiss() }
@@ -247,7 +278,8 @@ class MainActivity : AppCompatActivity() {
                 capitalRecord.createdate = nowdate
                 capitalRecord.versiondate = nowdate
                 capitalRecord.tpye = type.selectedItem.toString()
-                capitalRecord.tpyeName = type.selectedItem.toString()
+                capitalRecord.name = name.selectedItem.toString()
+                capitalRecord.twoType = twoType.selectedItem.toString()
                 if (type.selectedItem == "其他") {
                     capitalRecord.level = level.selectedItem.toString()
                     capitalRecord.status = status.selectedItem.toString()
@@ -263,17 +295,14 @@ class MainActivity : AppCompatActivity() {
                         ToastUtil.showSnackbarS(view, "周期不能为空")
                         return
                     }
-                    TextUtils.isEmpty(name.text.toString()) -> {
-                        ToastUtil.showSnackbarS(view, "名称不能为空")
-                        return
-                    }
+
                     TextUtils.isEmpty(amount.text.toString()) -> {
                         ToastUtil.showSnackbarS(view, "数额不能为空")
                         return
                     }
                     else -> {
                         val capitalisBeing =
-                            LitePal.where("phase = '${phase.text}' and name = '${name.text}'")
+                            LitePal.where("phase = '${phase.text}' and name = '${name.selectedItem}' and twoType = '${twoType.selectedItem}'")
                                 .findFirst<CapitalRecord>()
                         if (capitalisBeing != null) {
                             ToastUtil.showSnackbarS(view, "该记录重复")
@@ -282,7 +311,7 @@ class MainActivity : AppCompatActivity() {
 //                        val capitalRecordold = LitePal.where("phase = '${phase.text.toString().toInt() - 1}' and name = '${name.text}'").findFirst<CapitalRecord>()
 
                         capitalRecord.phase = phase.text.toString().toInt()
-                        capitalRecord.name = name.text.toString()
+//                        capitalRecord.name = name.text.toString()
                         capitalRecord.amount = amount.text.toString().toDouble()
                         capitalRecord.remark = remark.text.toString()
 //                        capitalRecord.change = capitalRecord.amount - (capitalRecordold?.amount ?: 0.0)
@@ -294,12 +323,16 @@ class MainActivity : AppCompatActivity() {
                         if (totalCapitalRecord != null) {
                             totalCapitalRecord.versiondate = capitalRecord.versiondate
                             totalCapitalRecord.totalamount += capitalRecord.amount
+                            if (capitalRecord.remark != "")
+                                totalCapitalRecord.remark += capitalRecord.remark + ","
 //                            totalCapitalRecord.totalchange = totalCapitalRecord.totalamount - (totalCapitalRecordold?.totalamount ?: 0.0)
                             totalCapitalRecord.save()
                         } else {
                             val totalCapital = TotalCapitalRecord()
                             totalCapital.createdate = capitalRecord.createdate
                             totalCapital.totalamount = capitalRecord.amount
+                            if (capitalRecord.remark != "")
+                                totalCapital.remark = capitalRecord.remark + ","
 //                            totalCapital.totalchange = totalCapital.totalamount - (totalCapitalRecordold?.totalamount?:0.0)
                             totalCapital.phase = capitalRecord.phase
                             totalCapital.save()
@@ -307,9 +340,13 @@ class MainActivity : AppCompatActivity() {
                         val s = capitalRecord.save()
                         totalCapitalRecordList = LitePal.order("phase desc").find()
                         for (t in totalCapitalRecordList) {
-                            t.capitalRecordlist = t.getList()
+                            when (changeType) {
+                                "账户" -> t.capitalRecordlist = t.get账户()
+                                "全部" -> t.capitalRecordlist = t.get全部()
+                                "类型" -> t.capitalRecordlist = t.get类型()
+                            }
                         }
-                        mAdapter.notifyDataSetChanged(totalCapitalRecordList)
+                        mAdapter.notifyDataSetChanged(totalCapitalRecordList, changeType)
 
                         if (s) {
                             ToastUtil.showSnackbarS(view, "添加成功")
@@ -329,7 +366,15 @@ class MainActivity : AppCompatActivity() {
     private fun select() {
         totalCapitalRecordList = LitePal.order("phase desc").limit(15).find()
         for (t in totalCapitalRecordList) {
-            t.capitalRecordlist = t.getList()
+            when (changeType) {
+                "账户" -> t.capitalRecordlist = t.get账户()
+                "全部" -> t.capitalRecordlist = t.get全部()
+                "类型" -> t.capitalRecordlist = t.get类型()
+            }
+//            if(t.remark.contains("上证3011,,")){
+//                t.remark = t.remark.replace("上证3011,,","上证3011,")
+//                t.save()
+//            }
         }
         pollToRefreshListView()
 
@@ -340,28 +385,38 @@ class MainActivity : AppCompatActivity() {
             .limit(15).offset(i * 15).find()
         if (totalCapitalRecordAddList.isNotEmpty()) {
             for (t in totalCapitalRecordAddList) {
-                t.capitalRecordlist = t.getList()
+                when (changeType) {
+                    "账户" -> t.capitalRecordlist = t.get账户()
+                    "全部" -> t.capitalRecordlist = t.get全部()
+                    "类型" -> t.capitalRecordlist = t.get类型()
+                }
             }
-            totalCapitalRecordList += totalCapitalRecordAddList
-            mAdapter.notifyDataSetChanged(totalCapitalRecordList)
+            totalCapitalRecordList = totalCapitalRecordList + totalCapitalRecordAddList
+            mAdapter.notifyDataSetChanged(totalCapitalRecordList, changeType)
         } else {
             ToastUtil.showLong(this, "没有更多数据了")
             start -= 1
         }
     }
 
-    private fun pop(et: EditText, sp: Spinner) {
+    private fun pop(type: Spinner, name: Spinner, twoType: Spinner, amount: EditText, remark: EditText) {
 
-        val adapter: ArrayAdapter<String> = ArrayAdapter(this, android.R.layout.simple_list_item_1, namelist)
+        val adapter: ArrayAdapter<String> = ArrayAdapter(this, android.R.layout.simple_list_item_1, twoNameList)
         mPopup.setAdapter(adapter)
         mPopup.width = ViewGroup.LayoutParams.WRAP_CONTENT
         mPopup.height = ViewGroup.LayoutParams.WRAP_CONTENT
         mPopup.isModal = true
-        mPopup.anchorView = et
+        mPopup.anchorView = name
         mPopup.setOnItemClickListener { parent, view, position, id ->
-            et.setText(lastCaplist[position].name)
-            SpringUtil.adapterDataString2(sp, lastCaplist[position].tpyeName)
+            SpringUtil.adapterDataString2(name, lastCapList[position].name)
+            SpringUtil.adapterDataString2(type, lastCapList[position].tpye)
+            SpringUtil.adapterDataString2(twoType, lastCapList[position].twoType)
+            amount.setText("")
+//            remark.setText("")
+            twoNameList.removeAt(position)
+            lastCapList = lastCapList - lastCapList[position]
             mPopup.dismiss()
+            zhanKey(amount,view)
         }
     }
 
@@ -385,14 +440,14 @@ class MainActivity : AppCompatActivity() {
         val mLayoutManage = LinearLayoutManager(this)
         //mLayoutManage.setOrientation(OrientationHelper.HORIZONTAL)//设置滚动方向，横向滚动
         recycleView.layoutManager = mLayoutManage
-        mAdapter = TotalAdapter(this, totalCapitalRecordList)
+        mAdapter = TotalAdapter(this, totalCapitalRecordList, changeType)
         recycleView.adapter = mAdapter
 
         //调用适配器里的方法
         mAdapter.setOnReItemOnclickLisenter(object : TotalAdapter.OnReItemOnclickLisenter {
             override fun OnReItemOnclick(view: View, position: Int) {
                 ToastUtil.showSnackbarS(view, "1S")
-
+/**
 //                val builder = AlertDialog.Builder(this@MainActivity)//修改这里
 //                val view = View.inflate(this@MainActivity, R.layout.lnui_total, null)
 //                val name: EditText = view.findViewById(R.id.name)
@@ -416,6 +471,7 @@ class MainActivity : AppCompatActivity() {
 ////                    mAdapter.notifyDataSetChanged(totalCapitalRecordList)
 //                }
 //                dialog.show()
+                */
             }
         })
 
@@ -424,12 +480,16 @@ class MainActivity : AppCompatActivity() {
                 TimeDialog(this@MainActivity).setOnClickBottomListener(object : TimeDialog.OnClickBottomListener {
 
                     override fun onPositiveClick() {
-                        for (c in totalCapitalRecordList[position].capitalRecordlist) {
-                            c.delete()
+                        if (changeType == "全部") {
+                            for (c in totalCapitalRecordList[position].capitalRecordlist) {
+                                c.delete()
+                            }
+                            totalCapitalRecordList[position].delete()
+                            totalCapitalRecordList = totalCapitalRecordList - totalCapitalRecordList[position]
+                            mAdapter.notifyDataSetChanged(totalCapitalRecordList, changeType)
+                        } else {
+                            ToastUtil.showSnackbar(view, "请切换到全部模式再删除")
                         }
-                        totalCapitalRecordList[position].delete()
-                        totalCapitalRecordList -= totalCapitalRecordList[position]
-                        mAdapter.notifyDataSetChanged(totalCapitalRecordList)
                     }
 
                     override fun onNegtiveClick() {
@@ -441,27 +501,57 @@ class MainActivity : AppCompatActivity() {
         })
 
     }
+    /***********准备**************/
 
-    /**
-     * 显示键盘
-     *
-     * @param et 输入焦点
-     */
-    fun showInput(et: EditText) {
-        et.requestFocus()
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT)
-    }
-
-    /**
-     * 隐藏键盘
-     */
-    fun hideInput() {
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        val v = window.peekDecorView()
-        if (null != v) {
-            imm.hideSoftInputFromWindow(v.windowToken, 0)
+    private fun read(){
+        fab.setOnClickListener {
+            // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            //.setAction("Action", null).show()
+            showAdd(this)
         }
+        fab2.setOnClickListener {
+            when (changeType) {
+                "账户" -> changeType = "全部"
+                "全部" -> changeType = "类型"
+                "类型" -> changeType = "账户"
+            }
+            fab2.text = changeType
+            select()
+        }
+
+        typeList.clear()
+        for (t in TypeEnum.values()) {
+            typeList.add(t.name)
+        }
+        levelList.clear()
+        for (t in LevelEnum.values()) {
+            levelList.add(t.name)
+        }
+        statusList.clear()
+        for (t in StatusEnum.values()) {
+            statusList.add(t.name)
+        }
+        namelist.clear()
+        val name1 = LitePal.where(" name <> '' ").find<CapitalRecordType>()
+        for (c in name1) {
+            namelist.add(c.name)
+        }
+        twoTypeList.clear()
+        val twotype1 = LitePal.where(" twotype <> '' ").find<CapitalRecordType>()
+        for (c in twotype1) {
+            twoTypeList.add(c.twoType)
+        }
+
+
+        val capPhase = LitePal.order("phase desc").findFirst<CapitalRecord>()
+        if (capPhase != null) {
+            lastCapList = LitePal.where("phase = ${capPhase.phase}").find<CapitalRecord>()
+            for (c in lastCapList) {
+                twoNameList.add(c.name + "    " + c.twoType)
+            }
+        }
+
+        mPopup = ListPopupWindow(this)
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -470,6 +560,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         select()
     }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -488,14 +579,23 @@ class MainActivity : AppCompatActivity() {
 //                if (15 > totalCapitalRecordList.size) m = totalCapitalRecordList.size
 //                val list10 = totalCapitalRecordList.subList(0, m)
 //                Collections.sort(list10, SortByPhase()) //排序
-                val lastyear = ProcessUtil.addDay(ProcessUtil.ConverToString(Date()),-1,3)
-                val list10 = LitePal.where("createdate > $lastyear").order("phase").limit(15).find<TotalCapitalRecord>()
+//                val lastyear = ProcessUtil.addDay(ProcessUtil.ConverToString(Date()),-1,3)
+                var lastPhase = 0
+                val capPhase = LitePal.order("phase desc").findFirst<CapitalRecord>()
+                if (capPhase != null) {
+                    lastPhase = capPhase.phase - 15
+                }
+                val list10 = LitePal.where("phase > $lastPhase").order("phase").limit(15).find<TotalCapitalRecord>()
                 val ss = gson.toJson(list10)
                 val intent = Intent(this, LineChartActivity2().javaClass)
                 intent.putExtra("list", ss)
                 startActivity(intent)
             }
-            R.id.action_settings -> ToastUtil.showLong(this, "测试")
+
+            R.id.action_settings -> {
+                val intent = Intent(this, Main2Activity().javaClass)
+                startActivity(intent)
+            }
         }
         return true
 //        return when (item.itemId) {
@@ -503,13 +603,64 @@ class MainActivity : AppCompatActivity() {
 //            else -> super.onOptionsItemSelected(item)
 //        }
     }
-    class SortByPhase : Comparator<TotalCapitalRecord>{
-        override fun compare(u1:TotalCapitalRecord, u2:TotalCapitalRecord):Int {
-            if(u1.phase>u2.phase){
+
+
+    class SortByPhase : Comparator<TotalCapitalRecord> {
+        override fun compare(u1: TotalCapitalRecord, u2: TotalCapitalRecord): Int {
+            if (u1.phase > u2.phase) {
                 return 1
             }
             return -1
         }
 
+    }
+
+    /**
+     * 显示键盘
+     * @param et 输入焦点
+     */
+    fun showInput(et: EditText) {
+        et.requestFocus()
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    /**
+     * 隐藏键盘
+     */
+    fun hideInput() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        val v = window.peekDecorView()
+        if (null != v) {
+            imm.hideSoftInputFromWindow(v.windowToken, 0)
+        }
+
+    }
+
+    private fun zhanKey(phase: EditText,v: View) {
+//        phase.isFocusable = true
+//        phase.isFocusableInTouchMode = true
+        phase.requestFocus()
+        val timer =  Timer()
+        timer.schedule(object :TimerTask()
+        {
+            override fun run()
+            {
+                val inputManager = v.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputManager.showSoftInput(phase, 0)
+            }
+        },120)
+    }
+
+    private fun souKey(v: View) {
+        //收起软键盘
+        val im: InputMethodManager = v.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val isOpen = im.isActive
+        try {
+            if (isOpen) im.hideSoftInputFromWindow(v.windowToken, 0)
+        } catch (e: Exception) {
+        }
+
+//        im.hideSoftInputFromWindow(this.currentFocus?.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
     }
 }

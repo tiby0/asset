@@ -1,61 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
         android:layout_marginTop="15dp"
+        android:layout_marginRight="15dp"
         android:background="@drawable/fm_shape_list"
         android:orientation="vertical">
 
     <TextView
             android:id="@+id/createDate"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:text="2019年11月15日 周五"
             android:textSize="10sp"
-            android:layout_margin="10dp"/>
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
             android:id="@+id/phase"
-            app:layout_constraintBaseline_toBaselineOf="@id/createDate"
-            app:layout_constraintRight_toRightOf="parent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
             android:text="第 1 期"
             android:textSize="10sp"
-            android:layout_marginRight="20dp"/>
+            app:layout_constraintBaseline_toBaselineOf="@id/createDate"
+            app:layout_constraintRight_toRightOf="parent" />
 
-        <TextView
-                android:id="@+id/total"
-            app:layout_constraintTop_toBottomOf="@id/createDate"
-            app:layout_constraintLeft_toLeftOf="parent"
+    <TextView
+            android:id="@+id/total"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="4567"
-            android:textSize="28sp"
             android:layout_marginLeft="20dp"
-                android:textColor="#000000"/>
+            android:text="4567"
+            android:textColor="#000000"
+            android:textSize="28sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/createDate" />
 
-        <TextView
-                android:id="@+id/totalChange"
-                app:layout_constraintBaseline_toBaselineOf="@id/total"
-            app:layout_constraintRight_toRightOf="parent"
+    <TextView
+            android:id="@+id/totalChange"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+4567"
-            android:textSize="24sp"
             android:layout_margin="15dp"
-                android:textColor="@color/text_red"/>
+            android:text="+4567"
+            android:textColor="@color/text_red"
+            android:textSize="24sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/total"
+            app:layout_constraintRight_toRightOf="parent" />
 
+    <TextView
+            android:id="@+id/remark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="备注"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/total" />
 
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/total">
-    </androidx.recyclerview.widget.RecyclerView>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/remark"></androidx.recyclerview.widget.RecyclerView>
 </androidx.constraintlayout.widget.ConstraintLayout>

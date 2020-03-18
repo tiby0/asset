@@ -14,6 +14,8 @@ import z.t.assetmanagement.dataBase.CapitalRecord;
 import z.t.assetmanagement.dataBase.TotalCapitalRecord;
 
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -23,12 +25,14 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
     private Context mContext;
     private List<CapitalRecord> data;
     private TotalCapitalRecord totalCapitalRecord;
+    private BigDecimal total;
 
 
-    public RecycleViewAdapter(Context context, List<CapitalRecord> brings, TotalCapitalRecord totalCapitalRecord2) {
+    public RecycleViewAdapter(Context context, List<CapitalRecord> brings, TotalCapitalRecord totalCapitalRecord2, BigDecimal total) {
         mContext = context;
         data = brings;
         totalCapitalRecord = totalCapitalRecord2;
+        this.total = total;
     }
 
     @Override
@@ -80,15 +84,16 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
 
         //相当于listview的adapter中的getview方法
         //负责将数据绑定到视图上
-
-        holder.amount.setText(String.valueOf(data.get(position).getAmount()));
+        String ss = new BigDecimal(String.valueOf(data.get(position).getAmount())).multiply(new BigDecimal(100))
+                .divide(total, 1, RoundingMode.HALF_UP) + "%";
+        holder.amount.setText(data.get(position).getAmount() + "    " + ss);
         holder.type.setText(data.get(position).getName());
         holder.change.setText(String.valueOf(data.get(position).getChange()));
         double change = data.get(position).getAmount();
         if (totalCapitalRecord != null) {
             for (CapitalRecord c : totalCapitalRecord.getCapitalRecordlist()) {
                 if (data.get(position).getName().equals(c.getName())) {
-                    change = data.get(position).getAmount()-c.getAmount();
+                    change = data.get(position).getAmount() - c.getAmount();
                     break;
                 }
             }

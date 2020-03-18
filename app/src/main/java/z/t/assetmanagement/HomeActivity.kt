@@ -1,11 +1,11 @@
 package z.t.assetmanagement
 
+import android.app.Service
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.renderscript.ScriptGroup
+import android.os.Vibrator
 import android.text.InputType
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -13,16 +13,12 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.android.synthetic.main.add.view.*
-
 import z.t.assetmanagement.biometriclib.BiometricPromptManager
 import z.t.assetmanagement.helpClass.ToastUtil
-import z.t.assetmanagement.style.TimeDialog
 import z.t.assetmanagement.style.TimeToast
 import z.t.assetmanagement.test.DataBaseTest
 import java.text.SimpleDateFormat
@@ -36,6 +32,8 @@ class HomeActivity : AppCompatActivity() {
     private var mManager: BiometricPromptManager? = null
     private var context: Context? = null
     var onerror = 0
+    var change = 0
+    var time: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,30 +64,49 @@ class HomeActivity : AppCompatActivity() {
         short1.setOnClickListener { view ->
             Snackbar.make(view, "短", Snackbar.LENGTH_SHORT)
                 .setAction("Action", null).show()
-            onerror+=1
-            if (onerror==10)
+            onerror += 1
+            if (onerror == 10)
                 startActivity(Intent(context, MainActivity().javaClass))
         }
         long1.setOnClickListener { view ->
             Snackbar.make(view, "长", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
-            onerror+=2
-            if (onerror==10)
+            onerror += 2
+            if (onerror == 10)
                 startActivity(Intent(context, MainActivity().javaClass))
         }
         `in`.setOnClickListener { view ->
             Snackbar.make(view, "不定", Snackbar.LENGTH_INDEFINITE)
                 .setAction("Action", null).show()
-            onerror+=3
-            if (onerror==10)
+            onerror += 3
+            if (onerror == 10)
                 startActivity(Intent(context, MainActivity().javaClass))
         }
         dialog.setOnClickListener { view ->
             TimeToast(this, "测试消息提示").show()
-            onerror+=4
-            if (onerror==10)
+            onerror += 4
+            if (onerror == 10)
                 startActivity(Intent(context, MainActivity().javaClass))
-        } 
+        }
+
+        changeButton.setOnClickListener {
+            if (Date().time - time < 400) {
+
+                change++
+                if (change == 4) change = 0
+
+                when (change) {
+                    0 -> changeButton.setImageResource(R.mipmap.title)
+                    1 -> changeButton.setImageResource(R.mipmap.btn_add_list)
+                    2 -> changeButton.setImageResource(R.mipmap.ic_launcher)
+                    3 -> changeButton.setImageResource(R.mipmap.mark)
+                }
+                val vib = this.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
+                vib.vibrate(100)
+            }
+            time = Date().time
+
+        }
     }
 
     var safe = false

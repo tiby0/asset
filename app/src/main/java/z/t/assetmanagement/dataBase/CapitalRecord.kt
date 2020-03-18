@@ -21,4 +21,6 @@ class CapitalRecord : LitePalSupport() {
     var change: Double = 0.0
     var remark: String = ""
 
+    var twoType: String = ""
+
 }

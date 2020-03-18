@@ -31,14 +31,14 @@
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:src="@mipmap/btn_add_list" />
-    <ImageView
+    <Button
             android:id="@+id/fab2"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_gravity="bottom|start"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-            android:src="@mipmap/login_more_down" />
+            android:layout_marginLeft="14dp"
+            android:layout_marginBottom="18dp"
+            android:text="切换" />
     <!--<com.google.android.material.floatingactionbutton.FloatingActionButton-->
             <!--android:id="@+id/fab"-->
             <!--android:layout_width="wrap_content"-->
